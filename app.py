@@ -160,6 +160,8 @@ def handle_answer_call(data):
     socketio.emit('call_accepted', data.get('signal'), room=f"user_{target_id}")
 
 if __name__ == '__main__':
+    import os
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True, port=5001, allow_unsafe_werkzeug=True)
+    port = int(os.environ.get("PORT", 5001))
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
