@@ -1,21 +1,42 @@
 import eventlet
 eventlet.monkey_patch()
 
+import logging
+import sys
+import os
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from extensions import db, socketio
 from models import User, Message
-import os
+
+# Setup logging to stdout so it shows up in Render logs
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
+                   format='%(asctime)s %(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!' # Change this in production
 
-# Use absolute path for SQLite to ensure it targets the /instance mount on Render
-db_path = os.path.join(app.root_path, 'instance', 'whatsapp.db')
+# Use absolute path for SQLite
+basedir = os.path.abspath(os.path.dirname(__file__))
+instance_path = os.path.join(basedir, 'instance')
+if not os.path.exists(instance_path):
+    os.makedirs(instance_path)
+    logger.info(f"Created instance folder at {instance_path}")
+
+db_path = os.path.join(instance_path, 'whatsapp.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db.init_app(app)
-socketio.init_app(app)
+logger.info(f"Database path: {db_path}")
+
+try:
+    db.init_app(app)
+    socketio.init_app(app)
+    with app.app_context():
+        db.create_all()
+        logger.info("Database tables created successfully")
+except Exception as e:
+    logger.error(f"Error during initialization: {str(e)}")
 
 @app.route('/')
 def index():
@@ -164,14 +185,6 @@ def handle_answer_call(data):
     # data: { to: id, signal: ... }
     target_id = data.get('to')
     socketio.emit('call_accepted', data.get('signal'), room=f"user_{target_id}")
-
-# Ensure instance folder exists for SQLite
-instance_path = os.path.join(app.root_path, 'instance')
-if not os.path.exists(instance_path):
-    os.makedirs(instance_path)
-
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
