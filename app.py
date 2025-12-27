@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from extensions import db, socketio
 from models import User, Message
@@ -5,7 +8,10 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!' # Change this in production
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///whatsapp.db'
+
+# Use absolute path for SQLite to ensure it targets the /instance mount on Render
+db_path = os.path.join(app.root_path, 'instance', 'whatsapp.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
