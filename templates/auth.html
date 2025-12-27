@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>WhatsApp Web</h2>
+        
+        <!-- Tabs for Login/Register toggling (simplified) -->
+        <div id="login-form">
+            <h3>Login</h3>
+            <form action="{{ url_for('login') }}" method="POST">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p onclick="document.getElementById('login-form').style.display='none';document.getElementById('register-form').style.display='block';" style="cursor:pointer;color:#008069;margin-top:15px;">Need an account? Register</p>
+        </div>
+
+        <div id="register-form" style="display:none;">
+            <h3>Register</h3>
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+            </form>
+            <p onclick="document.getElementById('register-form').style.display='none';document.getElementById('login-form').style.display='block';" style="cursor:pointer;color:#008069;margin-top:15px;">Already have an account? Login</p>
+        </div>
+    </div>
+</body>
+</html>

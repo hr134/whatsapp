@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Socket.IO Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- PeerJS for WebRTC -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- Font Awesome for Icons (using CDN for simplicity) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info-left">
+                    <div class="user-avatar"
+                        style="background-image: url('https://www.w3schools.com/w3images/avatar2.png');"></div>
+                    <div style="font-weight:bold;">{{ username }}</div>
+                </div>
+                <div class="header-icons">
+                    <i class="fas fa-edit icon-btn" title="Edit Profile" onclick="openProfileModal()"></i>
+                    <a href="{{ url_for('logout') }}" style="text-decoration:none;"><i
+                            class="fas fa-sign-out-alt icon-btn" title="Logout"></i></a>
+                </div>
+            </div>
+            <div class="search-bar-container">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="user-search-input" placeholder="Search or start new chat">
+                </div>
+            </div>
+            <div class="user-list" id="user-list">
+                <!-- Users will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" id="chat-header" style="display:none;">
+                <div class="chat-header-left">
+                    <div class="user-avatar" id="chat-avatar"
+                        style="background-image: url('https://www.w3schools.com/w3images/avatar2.png');"></div>
+                    <div class="chat-title" id="chat-title">User</div>
+                </div>
+                <div class="header-icons">
+                    <i class="fas fa-video icon-btn" onclick="startCall(true)"></i>
+                    <i class="fas fa-phone icon-btn" onclick="startCall(false)"></i>
+                </div>
+            </div>
+
+            <div class="messages" id="messages-area">
+                <div style="text-align:center;color:#888;margin-top:50px;">Select a chat to start messaging</div>
+            </div>
+
+            <div class="chat-input-area" id="input-area" style="display:none;">
+                <input type="text" id="message-input" placeholder="Type a message">
+                <button onclick="sendMessage()" style="background:none;border:none;cursor:pointer;">
+                    <i class="fas fa-paper-plane" style="color:#54656f;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Profile</h3>
+            <form action="{{ url_for('edit_profile') }}" method="POST">
+                <input type="text" name="about" placeholder="About (Status)" style="width:90%;">
+                <!-- Could add avatar URL input here -->
+                <button type="submit">Save</button>
+                <button type="button" onclick="closeProfileModal()"
+                    style="background-color:#ccc;margin-top:10px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Call Modal -->
+    <div id="callModal" class="modal">
+        <div class="modal-content" style="width:500px;background:#202c33;color:white;">
+            <h3 id="callStatus">Calling...</h3>
+            <div class="video-container">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <video id="localVideo" autoplay playsinline muted></video>
+            </div>
+            <div class="call-controls">
+                <button class="btn-red" onclick="endCall()">End Call</button>
+                <button class="btn-green" id="answerBtn" onclick="answerCall()" style="display:none;">Answer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.currentUserId = {{ user_id }};
+        window.currentUsername = "{{ username }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=7"></script>
+</body>
+
+</html>
