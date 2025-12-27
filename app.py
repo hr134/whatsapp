@@ -159,9 +159,14 @@ def handle_answer_call(data):
     target_id = data.get('to')
     socketio.emit('call_accepted', data.get('signal'), room=f"user_{target_id}")
 
+# Ensure instance folder exists for SQLite
+instance_path = os.path.join(app.root_path, 'instance')
+if not os.path.exists(instance_path):
+    os.makedirs(instance_path)
+
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    import os
-    with app.app_context():
-        db.create_all()
     port = int(os.environ.get("PORT", 5001))
     socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
